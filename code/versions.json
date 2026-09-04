@@ -1,0 +1,76 @@
+{
+  "repo": "/data/gulab/igem2026/data10/enzyme_update",
+  "versions": [
+    {
+      "id": "v1_main",
+      "ref": "main",
+      "commit": "6399e1e",
+      "date": "2026-06-17",
+      "label": "基线：CLAIRE+CAGE 固定流程 + enzyme_evaluation",
+      "features": "reaction_full / reaction_cage / homology_basic；无 reflect、无 enzyme-tk",
+      "has_etk": false,
+      "has_reflect": false,
+      "search_space": "swissprot_only"
+    },
+    {
+      "id": "v3_more",
+      "ref": "origin/feature/more-pipeline",
+      "commit": "d819414",
+      "date": "2026-07-29",
+      "label": "+ 文献/EPMSSA/DBM/酶改造固定流程",
+      "features": "新增 literature_full、epmssa_full、dbm_full、enzyme_redesign_*；无 reflect",
+      "has_etk": true,
+      "has_reflect": false,
+      "search_space": "swissprot_only"
+    },
+    {
+      "id": "v5_evolve",
+      "ref": "feature/proteus-catapro",
+      "commit": "6a6a6eb",
+      "date": "2026-08-22",
+      "label": "+ 定向进化（ProteusAI MCMC + CataPro 活性适应度）",
+      "features": "新增 directed_evolution_basic（evolution_query -> evolution_run）；保留 reflect 与全部旧流程",
+      "has_etk": true,
+      "has_reflect": true,
+      "search_space": "swissprot_only"
+    },
+    {
+      "id": "correct_cage",
+      "ref": "111",
+      "commit": "092eb55",
+      "date": "2026-09-03",
+      "label": "最新更改cage",
+      "features": "新检索链（goal 关键词 + EC 过滤 + _uniprot_search_adaptive）",
+      "has_etk": true,
+      "has_reflect": true,
+      "search_space": "swissprot_trembl_fallback"
+    }
+  ],
+  "excluded_archived": [
+    {
+      "ref": "origin/feature/claire_cage",
+      "commit": "c38aaf6",
+      "reason": "早于统一 pipelines.yaml/CLI 的中间分支，功能已被 main 吸收"
+    },
+    {
+      "ref": "origin/feature/enzyme-evaluation",
+      "commit": "397dd57",
+      "reason": "enzymecage 评估功能已并入 main（f71d986）"
+    },
+    {
+      "ref": "origin/feature/demand-vector-eval",
+      "commit": "cf803b6",
+      "reason": "DFS 评分被后续 evaluation 体系取代，且无统一 CLI"
+    },
+    {
+      "ref": "origin/feature/paper-rag",
+      "commit": "bb8aef1",
+      "reason": "无 -r/--pipeline CLI；PDF 解析功能与文献流程已并入 test_merge"
+    },
+    {
+      "ref": "origin/config_fix",
+      "commit": "88c3b0d",
+      "reason": "纯配置修复，无独立功能面"
+    }
+  ]
+}

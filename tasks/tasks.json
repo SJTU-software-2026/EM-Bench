@@ -1,0 +1,228 @@
+{
+  "benchmark_name": "EM-Bench",
+  "benchmark_version": "1.1",
+  "protocol_changelog": [
+    {
+      "version": "1.0",
+      "date": "2026-08-29",
+      "change": "初始协议：-r 仅传反应 SMILES；锚点可达性按 Swiss-Prot (reviewed_only=True) 静态计算"
+    },
+    {
+      "version": "1.1",
+      "date": "2026-09-03",
+      "change": "调用协议改为 -r '<goal 底物级描述> <SMILES>'（tasks.json 新增 goal_text 字段）；锚点可达性按版本 search_space 元数据动态计算（新增 versions.json search_space 字段：swissprot_only / swissprot_trembl_fallback）。旧版本只从查询文本提取 SMILES，文本部分不影响其检索，1.0 协议下的历史结果与新协议可比"
+    }
+  ],
+  "based_on": [
+    "deep-research-report.md (2026-08-23, 酶挖掘文献与可复现实验 Benchmark 设计)",
+    "EC-Bench (Bioinformatics Advances, doi:10.1093/bioadv/vbag004)"
+  ],
+  "default_pipeline": "reaction_full",
+  "default_phase": "all",
+  "max_candidates": 20,
+  "grade_legend": {
+    "0": "inactive / not retrieved",
+    "1": "weak positive (reserved)",
+    "2": "reference-like anchor (known enzyme from the source paper)",
+    "3": "better-than-reference / discovery anchor (the mined enzyme itself)"
+  },
+  "tasks": [
+    {
+      "id": "t1_abts",
+      "report_id": "B1",
+      "name": "ABTS oxidation (multicopper oxidase / laccase)",
+      "difficulty": "low",
+      "source": "ESM-Ezy, Nat Commun 16, 3274 (2025)",
+      "reaction_smiles": "CC[n+]1c2cc(S(=O)(=O)[O-])ccc2sc1N=Nc1sc2ccc(S(=O)(=O)[O-])cc2[n+]1CC>>CC[n+]1c2cc(S(=O)(=O)[O-])ccc2sc1[N+]=Nc1sc2ccc(S(=O)(=O)[O-])cc2[n+]1CC",
+      "smiles_note": "ABTS -> ABTS radical cation is a one-electron oxidation; the radical is represented formally at the azo bridge (RDKit-parseable pair).",
+      "paper_conditions": "50 mM citrate/NaOH pH 4.0, 37 C, ABTS 0.1-5 mM, A420 (eps=36,000 M-1 cm-1); 1 U = 1 umol min-1",
+      "detection": "A420",
+      "anchors": [
+        {
+          "accession": "P07788",
+          "grade": 2,
+          "label": "CotA (Bacillus subtilis laccase)",
+          "ec": "1.10.3.2",
+          "role": "reference"
+        },
+        {
+          "accession": "D0VWU3",
+          "grade": 2,
+          "label": "LAC1_TRAMX (Trametes versicolor laccase)",
+          "ec": "1.10.3.2",
+          "role": "reference"
+        }
+      ],
+      "notes": "ABTS saturates Hit@k quickly; per deep-research-report it serves as assay/system calibration rather than strong agent discrimination.",
+      "goal_text": "Oxidize ABTS (2,2'-azino-bis(3-ethylbenzothiazoline-6-sulfonic acid)) to its radical cation."
+    },
+    {
+      "id": "t2_trp_indole",
+      "report_id": "B2",
+      "name": "L-tryptophan -> indole + pyruvate + NH3 (tryptophanase, PLP)",
+      "difficulty": "low",
+      "source": "de Boer et al., ACS Omega (2026), doi:10.1021/acsomega.5c11382",
+      "reaction_smiles": "N[C@@H](Cc1c[nH]c2ccccc12)C(=O)O>>c1ccc2[nH]ccc2c1",
+      "smiles_note": "Co-products pyruvate and NH3 are omitted from the reaction SMILES (single-product canonical form).",
+      "paper_conditions": "5 mM L-Trp, 50 uM PLP, 1 uM enzyme, pH 7, 30 C, 10 min (paper standardized assay, n=4); indole by HPLC-UV",
+      "detection": "HPLC-UV / indole colorimetry",
+      "anchors": [
+        {
+          "accession": "P0A853",
+          "grade": 2,
+          "label": "TnaA / EcoTIL (E. coli tryptophanase)",
+          "ec": "4.1.99.1",
+          "role": "reference"
+        }
+      ],
+      "notes": "EcoTIL and VchTIL are the paper's reference enzymes; PreTIL (cascade anchor) has no UniProtKB accession.",
+      "goal_text": "Convert L-tryptophan to indole, pyruvate and ammonia."
+    },
+    {
+      "id": "t3_co2_hco3",
+      "report_id": "B3",
+      "name": "CO2 + H2O -> HCO3- + H+ (carbonic anhydrase)",
+      "difficulty": "low",
+      "source": "Rigkos et al., Environ. Sci. Technol. (2024), doi:10.1021/acs.est.4c04291",
+      "reaction_smiles": "O=C=O>>O=C([O-])O",
+      "smiles_note": "Proton release implied; bicarbonate written as carboxylate.",
+      "paper_conditions": "phenol-red CO2 hydration assay, pH ~8.3; stopped-flow kinetics 25 C (CA-KR1 kcat ~1.2e3 s-1, KM ~4.9 mM)",
+      "detection": "pH / stopped-flow",
+      "anchors": [
+        {
+          "accession": "P00918",
+          "grade": 2,
+          "label": "CAH2_HUMAN (human carbonic anhydrase II)",
+          "ec": "4.2.1.1",
+          "role": "reference"
+        },
+        {
+          "accession": "P00921",
+          "grade": 2,
+          "label": "CAH2_BOVIN (bovine carbonic anhydrase II)",
+          "ec": "4.2.1.1",
+          "role": "reference"
+        }
+      ],
+      "notes": "CA-KR1 itself is GenBank BK065798 (not in UniProtKB) -> listed as literature-only anchor.",
+      "goal_text": "Hydrate carbon dioxide to bicarbonate."
+    },
+    {
+      "id": "t4_vg_vanillin",
+      "report_id": "B4",
+      "name": "4-vinylguaiacol -> vanillin + formaldehyde (cofactor-free CSO oxidase)",
+      "difficulty": "medium",
+      "source": "Wang et al. / CataPro, Nat Commun 16 (2025), doi:10.1038/s41467-025-58038-4",
+      "reaction_smiles": "COc1cc(C=C)ccc1O>>COc1cc(C=O)ccc1O",
+      "smiles_note": "Co-product formaldehyde omitted (single-product canonical form).",
+      "paper_conditions": "60 mM 4-VG, 50 mM Na2CO3/NaHCO3 pH 9.5, 25 C, 60 min; formaldehyde colorimetric A480 + HPLC/LC-MS vanillin",
+      "detection": "A480 (formaldehyde) + LC-MS",
+      "anchors": [
+        {
+          "accession": "G2QIL8",
+          "grade": 2,
+          "label": "Aromatic dioxygenase (Thermothelomyces thermophilus), vinylguaiacol-annotated",
+          "ec": "1.13.11.88",
+          "role": "reference"
+        }
+      ],
+      "notes": "Literature anchors CSO2 (reference) and SsCSO (~19.53x CSO2) have no UniProtKB accessions -> recorded but not retrievable. This task mainly tests EC-space retrieval (1.13.11.*).",
+      "goal_text": "Convert 4-vinylguaiacol to vanillin and formaldehyde."
+    },
+    {
+      "id": "t5_pet_hydrolysis",
+      "report_id": "B5",
+      "name": "PET -> MHET + TPA (PET hydrolase / PETase)",
+      "difficulty": "high",
+      "source": "Wu et al. / VenusMine, Nat Commun 16 (2025), doi:10.1038/s41467-025-61599-z",
+      "reaction_smiles": "OCCOC(=O)c1ccc(C(=O)OCCO)cc1>>OCCOC(=O)c1ccc(C(=O)O)cc1",
+      "smiles_note": "Polymeric PET cannot be written as a finite SMILES; the benchmark uses bis(2-hydroxyethyl) terephthalate (BHET dimer) -> monoester as the surrogate reaction query.",
+      "paper_conditions": "Goodfellow amorphous PET film, 6-mm disc; 50 mM glycine-NaOH pH 9; final enzyme ~0.0167 mg/mL; 30-65 C; 72 h; UPLC quantifies MHET+TPA",
+      "detection": "UPLC/HPLC (TPA, MHET)",
+      "anchors": [
+        {
+          "accession": "A0A0K8P6T7",
+          "grade": 2,
+          "label": "IsPETase (Ideonella sakaiensis)",
+          "ec": "3.1.1.101",
+          "role": "reference"
+        },
+        {
+          "accession": "G9BY57",
+          "grade": 2,
+          "label": "LCC (leaf-branch compost cutinase)",
+          "ec": "3.1.1.101",
+          "role": "reference"
+        }
+      ],
+      "notes": "KbPETase (PDB 9IW9, thermostable hit) is not in UniProtKB -> literature-only anchor. pNPB (EC 3.1.1.-) is the paper's QC assay.",
+      "goal_text": "Hydrolyze PET (polyethylene terephthalate) to MHET and terephthalic acid."
+    },
+    {
+      "id": "t6_asp_chloro",
+      "report_id": "B6",
+      "name": "L-aspartate -> (3S)-chloro-L-aspartate (Fe(II)/alphaKG halogenase)",
+      "difficulty": "high",
+      "source": "Kipouros & Chang, Nature (2026), doi:10.1038/s41586-026-10716-z",
+      "reaction_smiles": "N[C@@H](CC(=O)O)C(=O)O>>N[C@H]([C@H](Cl)C(=O)O)C(=O)O",
+      "smiles_note": "Product stereocenters (2S, 3S) verified by RDKit CIP assignment.",
+      "paper_conditions": "25 uM AspX, 0.5 mM L-Asp, 50 mM HEPES pH 7.5, 1 mM Fe2+, 5 mM alphaKG, 5 mM ascorbate, 100 mM NaCl, aerobic, 2 h (kcat 33.3 min-1, KM 0.64 mM, TON ~780)",
+      "detection": "LC-MS (+ chiral analysis for 3S)",
+      "anchors": [
+        {
+          "accession": "A0AAC9SM19",
+          "grade": 3,
+          "label": "AspX (metal-coordination-geometry mined halogenase)",
+          "ec": "",
+          "role": "discovery"
+        }
+      ],
+      "notes": "AspX has no assigned EC; UniProtKB accession A0AAC9SM19 was DELETED (reason: not part of a reference proteome) and no chloroaspartate-annotated protein exists in UniProtKB -> the anchor is unreachable by construction for every version. Discovery required structural metal-coordination mining, not sequence homology. t6 Hit metrics are therefore 0 across all versions; the task still discriminates via predicted-EC space and toolchain behavior.",
+      "goal_text": "Chlorinate L-aspartate at C3 to (3S)-chloro-L-aspartate."
+    },
+    {
+      "id": "t7_biotin_chloro",
+      "report_id": "B7",
+      "name": "biotin -> (2R)-chlorobiotin (Fe(II)/alphaKG halogenase)",
+      "difficulty": "high",
+      "source": "Kipouros & Chang, Nature (2026), doi:10.1038/s41586-026-10716-z",
+      "reaction_smiles": "C1[C@@H]2[C@@H]([C@H](S1)CCCCC(=O)O)NC(=O)N2>>Cl[C@@H]1[C@@H]2[C@@H]([C@H](S1)CCCCC(=O)O)NC(=O)N2",
+      "smiles_note": "D-biotin (3aS,4S,6aR) and chlorination at thiolane C2 (2R); stereochemistry verified by RDKit CIP assignment.",
+      "paper_conditions": "BtnX: kcat ~0.96 min-1, KM < 2 uM, TON ~22; LC-MS/QTOF + chlorinated isotope pattern; 2R verified; product-bound structure PDB 9Q04",
+      "detection": "LC-MS/QTOF",
+      "anchors": [
+        {
+          "accession": "A8LT50",
+          "grade": 3,
+          "label": "BtnX (mined halogenase; formerly annotated phytanoyl-CoA dioxygenase)",
+          "ec": "",
+          "role": "discovery"
+        }
+      ],
+      "notes": "BtnX lacks an assigned EC; its UniProt annotation (phytanoyl-CoA dioxygenase) is wrong for this activity -> tests whether the pipeline can surface mis-annotated proteins.",
+      "goal_text": "Chlorinate biotin to (2R)-chlorobiotin."
+    },
+    {
+      "id": "t8_dehp_hydrolysis",
+      "report_id": "B8",
+      "name": "DEHP -> mono(2-ethylhexyl) phthalate (phthalate esterase)",
+      "difficulty": "medium",
+      "source": "Mora et al. / Enzyme-tk, bioRxiv (2026), doi:10.64898/2026.02.02.703255",
+      "reaction_smiles": "O=C(OCC(CC)CCCC)c1ccccc1C(=O)OCC(CC)CCCC>>O=C(O)c1ccccc1C(=O)OCC(CC)CCCC",
+      "smiles_note": "First ester bond hydrolysis of DEHP; full hydrolysis of both esters is a second reaction.",
+      "paper_conditions": "author assay recipe not fully disclosed; benchmark suggestion: 50 mM phosphate/HEPES pH 7.5-8.0, 25-37 C, DEHP 0.1-0.5 mM, 1-5% DMSO, 1-4 h",
+      "detection": "LC-MS/GC (DEHP disappearance + monoester)",
+      "anchors": [
+        {
+          "accession": "Q7SIG1",
+          "grade": 3,
+          "label": "DEHP hydrolase (thermophilic Bacillus acidocaldarius), Enzyme-tk Func-e hit",
+          "ec": "",
+          "role": "discovery"
+        }
+      ],
+      "notes": "Anthropogenic substrate outside training distributions; tests reaction generalization beyond natural chemistry.",
+      "goal_text": "Hydrolyze DEHP (bis(2-ethylhexyl) phthalate) to mono(2-ethylhexyl) phthalate."
+    }
+  ]
+}
